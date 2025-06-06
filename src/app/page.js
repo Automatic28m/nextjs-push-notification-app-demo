@@ -1,4 +1,5 @@
-import PushManager from '../components/PushManager';
+import PushManager from '../PushManager';
+import PushClientHandler from './PushClientHandler';
 
 export default function Home() {
   return (
@@ -6,6 +7,7 @@ export default function Home() {
       <h1 className='text-center'>Web Push Demo</h1>
       <div className='flex justify-center'>
         <PushManager />
+        <PushClientHandler />
       </div>
     </div>
   );
