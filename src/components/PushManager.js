@@ -5,10 +5,16 @@ export default function PushManager() {
     const [isSupported, setIsSupported] = useState(false);
 
     useEffect(() => {
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const hasSw = 'serviceWorker' in navigator;
+        const hasPm = 'PushManager' in window;
+
+        // For iOS 16.4+, PushManager may still be missing, so allow only SW check
+        if (hasSw && (hasPm || isIos)) {
             setIsSupported(true);
         }
     }, []);
+
 
     const subscribe = async () => {
         const reg = await navigator.serviceWorker.register('/sw.js');

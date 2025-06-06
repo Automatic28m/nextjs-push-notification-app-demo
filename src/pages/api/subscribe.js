@@ -1,32 +1,24 @@
-import webpush from 'web-push';
+const subscribe = async () => {
+    try {
+        const reg = await navigator.serviceWorker.register('/sw.js');
 
-webpush.setVapidDetails(
-    process.env.VAPID_EMAIL,
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-);
+        // Wait until the service worker is ready (fully activated)
+        const readyReg = await navigator.serviceWorker.ready;
 
-let subscriptions = []; // for demo only; use DB in real apps
-
-export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        const subscription = req.body;
-        subscriptions.push(subscription);
-
-        // send test notification
-        const payload = JSON.stringify({
-            title: 'Demo Push',
-            body: 'You successfully subscribed!',
+        const sub = await readyReg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
         });
 
-        try {
-            await webpush.sendNotification(subscription, payload);
-            res.status(201).json({ message: 'Notification sent' });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Notification failed' });
-        }
-    } else {
-        res.status(405).json({ error: 'Method not allowed' });
+        await fetch('/api/subscribe', {
+            method: 'POST',
+            body: JSON.stringify(sub),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        alert('Subscribed!');
+    } catch (error) {
+        console.error('Subscription failed:', error);
+        alert('Push subscription failed. Check the console.');
     }
-}
+};
